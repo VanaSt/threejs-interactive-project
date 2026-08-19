@@ -86,6 +86,14 @@ cube1.userData.targetColor = cube1.userData.originalColor;
 cube2.userData.targetColor = cube2.userData.originalColor;
 cube3.userData.targetColor = cube3.userData.originalColor;
 
+cube1.userData.startY = cube1.position.y;
+cube2.userData.startY = cube2.position.y;
+cube3.userData.startY = cube3.position.y;
+
+cube1.userData.floatSpeed = 0.001;
+cube2.userData.floatSpeed = 0.0015;
+cube3.userData.floatSpeed = 0.002;
+
 scene.add(cube1, cube2, cube3);
 
 const controls = new DragControls (
@@ -100,6 +108,7 @@ controls.addEventListener('dragstart', (event) => {
 });
 
 controls.addEventListener('dragend', (event) => {
+    event.object.userData.startY = event.object.position.y;
     draggedObject = null;
     console.log('Stopped dragging: ', event.object.name);
 });
@@ -169,6 +178,17 @@ function animate() {
 
         cube.material.color.lerp(targetColor, 0.1);
     });
+
+
+    if (draggedObject !== cube1) {
+        cube1.position.y = cube1.userData.startY + Math.sin(Date.now() * cube1.userData.floatSpeed) * 0.3;
+    }
+    if (draggedObject !== cube2) {
+        cube2.position.y = cube2.userData.startY + Math.sin(Date.now() * cube2.userData.floatSpeed) * 0.3;
+    }
+    if (draggedObject !== cube3) {
+        cube3.position.y = cube3.userData.startY + Math.sin(Date.now() * cube3.userData.floatSpeed) * 0.3;
+    }
 
     renderer.render(scene, camera);
 }
