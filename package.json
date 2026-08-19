@@ -1,0 +1,28 @@
+{
+  "name": "three",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev":"vite --host 127.0.0.1",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "vite": "^6.4.3"
+  },
+  "dependencies": {
+    "esbuild": "^0.25.12",
+    "fdir": "^6.5.0",
+    "nanoid": "^3.3.18",
+    "picocolors": "^1.1.1",
+    "picomatch": "^4.0.5",
+    "postcss": "^8.5.26",
+    "rollup": "^4.62.4",
+    "source-map-js": "^1.2.1",
+    "three": "^0.185.1",
+    "tinyglobby": "^0.2.17"
+  },
+  "description": ""
+}
