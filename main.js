@@ -18,12 +18,113 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 
+
+// const starsGeometry = new THREE.BufferGeometry();
+
+// // Create 1000 stars.
+// const starsCount = 3000;
+
+// // Every star needs three coordinates: x,y,z. It's an efficient way to store lots of numbers for the GPU.
+// const starsPositions = new Float32Array(starsCount * 3); 
+
+// // Randomly position them - distributed throughout 3D space.
+// for (let i = 0; i < starsCount * 3; i++) {
+//     starsPositions[i] = (Math.random() - 0.5) * 100;
+// }
+
+// starsGeometry.setAttribute(
+//     'position',
+//     new THREE.BufferAttribute(starsPositions, 3)
+// );
+
+// const starsMaterial = new THREE.PointsMaterial({
+//     color: 0xffffff,
+//     size: 0.1
+// });
+
+// const stars = new THREE.Points(
+//     starsGeometry,
+//     starsMaterial
+// );
+
+
+
+const smallStarsCount = 700;
+const mediumStarsCount = 250;
+const bigStarsCount = 50;
+
+const smallStarsGeometry = new THREE.BufferGeometry();
+const mediumStarsGeometry = new THREE.BufferGeometry();
+const bigStarsGeometry = new THREE.BufferGeometry();
+
+const smallStarsPositions = new Float32Array(smallStarsCount * 3);
+const mediumStarsPositions = new Float32Array(mediumStarsCount * 3);
+const bigStarsPositions = new Float32Array(bigStarsCount * 3);
+
+for (let i = 0; i < smallStarsCount * 3; i++) {
+    smallStarsPositions[i] = (Math.random() - 0.5) * 100;
+}
+
+for (let i = 0; i < mediumStarsCount * 3; i++) {
+    mediumStarsPositions[i] = (Math.random() - 0.5) * 100;
+}
+
+for (let i = 0; i < bigStarsCount * 3; i++) {
+    bigStarsPositions[i] = (Math.random() - 0.5) * 100;
+}
+
+smallStarsGeometry.setAttribute(
+    'position',
+    new THREE.BufferAttribute(smallStarsPositions, 3)
+);
+
+mediumStarsGeometry.setAttribute(
+    'position',
+    new THREE.BufferAttribute(mediumStarsPositions, 3)
+);
+
+bigStarsGeometry.setAttribute(
+    'position',
+    new THREE.BufferAttribute(bigStarsPositions, 3)
+);
+
+
+const smallStarsMaterial = new THREE.PointsMaterial({
+    color: 0xffffff,
+    size: 0.05
+});
+
+const mediumStarsMaterial = new THREE.PointsMaterial({
+    color: 0xffffff,
+    size: 0.1
+});
+
+const bigStarsMaterial = new THREE.PointsMaterial({
+    color: 0xffffff,
+    size: 0.2
+});
+
+
+const smallStars = new THREE.Points(
+    smallStarsGeometry,
+    smallStarsMaterial
+);
+
+const mediumStars = new THREE.Points(
+    mediumStarsGeometry,
+    mediumStarsMaterial
+);
+
+const bigStars = new THREE.Points(
+    bigStarsGeometry,
+    bigStarsMaterial
+);
+
+
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
 let hoveredObject = null;
-
-
 
 window.addEventListener('mousemove', (event) => {
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -94,7 +195,8 @@ cube1.userData.floatSpeed = 0.001;
 cube2.userData.floatSpeed = 0.0015;
 cube3.userData.floatSpeed = 0.002;
 
-scene.add(cube1, cube2, cube3);
+scene.add(cube1, cube2, cube3, smallStars, mediumStars, bigStars);
+
 
 const controls = new DragControls (
     [cube1, cube2, cube3],
@@ -162,7 +264,7 @@ function animate() {
                 hoveredObject.userData.originalColor;
 
             hoveredObject = null;
-} 
+        } 
     }
 
     cubes.forEach((cube) => {
