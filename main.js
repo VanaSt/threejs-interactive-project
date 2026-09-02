@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { DragControls } from 'three/examples/jsm/Addons.js';
+import { DragControls, OrbitControls } from 'three/examples/jsm/Addons.js';
 
 let draggedObject = null;
 
@@ -49,9 +49,9 @@ document.body.appendChild(renderer.domElement);
 
 
 
-const smallStarsCount = 700;
-const mediumStarsCount = 250;
-const bigStarsCount = 50;
+const smallStarsCount = 1400;
+const mediumStarsCount = 500;
+const bigStarsCount = 100;
 
 const smallStarsGeometry = new THREE.BufferGeometry();
 const mediumStarsGeometry = new THREE.BufferGeometry();
@@ -89,21 +89,52 @@ bigStarsGeometry.setAttribute(
 );
 
 
+// Create a soft glowing texture for the stars
+const canvas = document.createElement('canvas');
+canvas.width = 64;
+canvas.height = 64;
+
+const context = canvas.getContext('2d');
+
+const gradient = context.createRadialGradient(
+    32, 32, 0,
+    32, 32, 32
+);
+
+gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+gradient.addColorStop(0.2, 'rgba(255, 255, 255, 1)');
+gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.3)');
+gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+context.fillStyle = gradient;
+context.fillRect(0, 0, 64, 64);
+
+const starTexture = new THREE.CanvasTexture(canvas);
+
+
 const smallStarsMaterial = new THREE.PointsMaterial({
     color: 0xffffff,
-    size: 0.05
+    size: 0.08,
+    map: starTexture,
+    transparent: true,
+    depthWrite: false
 });
 
 const mediumStarsMaterial = new THREE.PointsMaterial({
     color: 0xffffff,
-    size: 0.1
+    size: 0.15,
+    map: starTexture,
+    transparent: true,
+    depthWrite: false
 });
 
 const bigStarsMaterial = new THREE.PointsMaterial({
     color: 0xffffff,
-    size: 0.2
+    size: 0.3,
+    map: starTexture,
+    transparent: true,
+    depthWrite: false
 });
-
 
 const smallStars = new THREE.Points(
     smallStarsGeometry,
@@ -120,6 +151,13 @@ const bigStars = new THREE.Points(
     bigStarsMaterial
 );
 
+
+// Twinkling settings
+const smallStarsBaseOpacity = 0.7;
+const mediumStarsBaseOpacity = 0.8;
+const bigStarsBaseOpacity = 1;
+
+const starMovementSpeed = 0.00002;
 
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
@@ -204,14 +242,28 @@ const controls = new DragControls (
     renderer.domElement
 );
 
+const orbitControls = new OrbitControls(
+    camera,
+    renderer.domElement
+);
+
+
+orbitControls.enableDamping = true;
+orbitControls.dampingFactor = 0.05;
+
+orbitControls.minDistance = 3;
+orbitControls.maxDistance = 15;
+
 controls.addEventListener('dragstart', (event) => {
     draggedObject = event.object;
+    orbitControls.enabled = false;
     console.log('Started dragging: ', event.object.name);
 });
 
 controls.addEventListener('dragend', (event) => {
     event.object.userData.startY = event.object.position.y;
     draggedObject = null;
+    orbitControls.enabled = true;
     console.log('Stopped dragging: ', event.object.name);
 });
 
@@ -219,6 +271,26 @@ camera.position.z = 5;
 
 function animate() {
     requestAnimationFrame(animate);
+
+    orbitControls.update();
+
+    // Twinkle effect
+    const time = Date.now() * 0.002;
+
+    smallStarsMaterial.opacity =
+        smallStarsBaseOpacity + Math.sin(time) * 0.3;
+
+    mediumStarsMaterial.opacity =
+        mediumStarsBaseOpacity + Math.sin(time * 1.3) * 0.3;
+
+    bigStarsMaterial.opacity =
+        bigStarsBaseOpacity + Math.sin(time * 0.7) * 0.3;
+
+
+    // Subtle star movement
+    smallStars.rotation.y += starMovementSpeed;
+    mediumStars.rotation.y += starMovementSpeed * 0.8;
+    bigStars.rotation.y += starMovementSpeed * 0.5;
 
 
     if (draggedObject !== cube1) {
