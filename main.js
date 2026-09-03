@@ -3,8 +3,257 @@ import { DragControls, OrbitControls } from 'three/examples/jsm/Addons.js';
 
 let draggedObject = null;
 
+let isTraveling = false;
+let journeyProgress = 0;
+
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x080b24);
+
+
+const destinations = [
+    {
+        id: "the-why",
+        title: "THE WHY",
+        position: new THREE.Vector3(0, -2, 0),
+        color: 0xffcc66,
+        experiences: []
+    },
+
+    {
+        id: "education",
+        title: "EDUCATION",
+        position: new THREE.Vector3(0.4, 1, 0),
+        color: 0xffcc66,
+        experiences: []
+    },
+
+    {
+        id: "retail",
+        title: "CUSTOMER / RETAIL",
+        position: new THREE.Vector3(0, 3, 0),
+        color: 0xff9966,
+        experiences: []
+    },
+
+    {
+        id: "video-club",
+        title: "VIDEO CLUB",
+        position: new THREE.Vector3(-0.5, 5, 0),
+        color: 0xff6699,
+        experiences: []
+    },
+
+    {
+        id: "web-development",
+        title: "WEB DEVELOPMENT",
+        position: new THREE.Vector3(0.5, 7, 0),
+        color: 0x66ccff,
+        experiences: []
+    },
+
+    {
+        id: "service-delivery",
+        title: "SERVICE DELIVERY",
+        position: new THREE.Vector3(-0.3, 9, 0),
+        color: 0x66ffcc,
+        experiences: []
+    },
+
+    {
+        id: "iam",
+        title: "IAM",
+        position: new THREE.Vector3(0.4, 11, 0),
+        color: 0x9966ff,
+        experiences: []
+    },
+
+    {
+        id: "qa",
+        title: "QA",
+        position: new THREE.Vector3(-0.4, 13, 0),
+        color: 0xff6699,
+        experiences: []
+    },
+
+    {
+        id: "what-didnt-work",
+        title: "WHAT DIDN'T WORK",
+        position: new THREE.Vector3(0.2, 15, 0),
+        color: 0x888888,
+        experiences: []
+    },
+
+    {
+        id: "future",
+        title: "FUTURE",
+        position: new THREE.Vector3(0, 17, 0),
+        color: 0xffffff,
+        experiences: []
+    }
+];
+
+
+// THE WHY - our Sun
+const why = destinations.find(
+    destination => destination.id === "the-why"
+);
+
+const whyGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+
+const whyMaterial = new THREE.MeshBasicMaterial({
+    color: why.color
+});
+
+const whyPlanet = new THREE.Mesh(
+    whyGeometry,
+    whyMaterial
+);
+
+whyPlanet.position.copy(why.position);
+
+scene.add(whyPlanet);
+
+
+
+// Soft glow around THE WHY
+const glowCanvas = document.createElement('canvas');
+glowCanvas.width = 128;
+glowCanvas.height = 128;
+
+const glowContext = glowCanvas.getContext('2d');
+
+const glowGradient = glowContext.createRadialGradient(
+    64, 64, 0,
+    64, 64, 64
+);
+
+glowGradient.addColorStop(0, 'rgba(255, 204, 102, 0.8)');
+glowGradient.addColorStop(0.3, 'rgba(255, 204, 102, 0.35)');
+glowGradient.addColorStop(0.7, 'rgba(255, 204, 102, 0.08)');
+glowGradient.addColorStop(1, 'rgba(255, 204, 102, 0)');
+
+glowContext.fillStyle = glowGradient;
+glowContext.fillRect(0, 0, 128, 128);
+
+const glowTexture = new THREE.CanvasTexture(glowCanvas);
+
+const glowMaterial = new THREE.SpriteMaterial({
+    map: glowTexture,
+    transparent: true,
+    depthWrite: false
+});
+
+const whyGlow = new THREE.Sprite(glowMaterial);
+
+whyGlow.position.copy(why.position);
+whyGlow.scale.set(1.8, 1.8, 1);
+
+scene.add(whyGlow);
+
+
+// EDUCATION destination
+const education = destinations.find(
+    destination => destination.id === "education"
+);
+
+const educationGeometry = new THREE.SphereGeometry(0.35, 32, 32);
+
+const educationMaterial = new THREE.MeshBasicMaterial({
+    color: education.color
+});
+
+const educationPlanet = new THREE.Mesh(
+    educationGeometry,
+    educationMaterial
+);
+
+educationPlanet.position.copy(education.position);
+
+scene.add(educationPlanet);
+
+
+// Education orbit ring
+const educationRingGeometry = new THREE.RingGeometry(0.45, 0.50, 64);
+
+const educationRingMaterial = new THREE.MeshBasicMaterial({
+    color: education.color,
+    transparent: true,
+    opacity: 0.35,
+    side: THREE.DoubleSide
+});
+
+const educationRing = new THREE.Mesh(
+    educationRingGeometry,
+    educationRingMaterial
+);
+
+educationRing.position.copy(education.position);
+
+educationRing.rotation.x = Math.PI / 2;
+
+// Second Education orbit ring
+const educationRing2Geometry = new THREE.RingGeometry(0.55, 0.59, 64);
+
+const educationRing2Material = new THREE.MeshBasicMaterial({
+    color: education.color,
+    transparent: true,
+    opacity: 0.2,
+    side: THREE.DoubleSide
+});
+
+const educationRing2 = new THREE.Mesh(
+    educationRing2Geometry,
+    educationRing2Material
+);
+
+educationRing2.position.copy(education.position);
+
+educationRing2.rotation.x = Math.PI / 2;
+educationRing2.rotation.z = Math.PI / 3;
+
+scene.add(educationRing, educationRing2);
+
+
+// Education ring rotation
+educationRing.rotation.z += 0.005;
+
+
+// Cosmic journey path
+const journeyCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0, -2, 0),   // THE WHY
+    new THREE.Vector3(0.5, -1, 0),
+    new THREE.Vector3(-0.3, 0, 0),
+    new THREE.Vector3(0.4, 1, 0),  // EDUCATION
+    new THREE.Vector3(0, 2, 0)
+]);
+
+const journeyGeometry = new THREE.TubeGeometry(
+    journeyCurve,
+    100,
+    0.015,
+    8,
+    false
+);
+
+const journeyMaterial = new THREE.MeshBasicMaterial({
+    color: 0x8888ff,
+    transparent: true,
+    opacity: 0.35
+});
+
+const journeyTrail = new THREE.Mesh(
+    journeyGeometry,
+    journeyMaterial
+);
+
+scene.add(journeyTrail);
+
+function travelToEducation() {
+    if (isTraveling) return;
+
+    isTraveling = true;
+    journeyProgress = 0;
+}
 
 const camera = new THREE.PerspectiveCamera(
     75, 
@@ -267,10 +516,25 @@ controls.addEventListener('dragend', (event) => {
     console.log('Stopped dragging: ', event.object.name);
 });
 
-camera.position.z = 5;
+camera.position.set(0, -2, 5);
 
 function animate() {
     requestAnimationFrame(animate);
+
+
+
+    // THE WHY breathing animation
+    const whyPulse = 1 + Math.sin(Date.now() * 0.002) * 0.08;
+
+    whyPlanet.scale.set(
+        whyPulse,
+        whyPulse,
+        whyPulse
+    );
+
+    // Education ring rotation
+    educationRing.rotation.y += 0.005;
+    educationRing2.rotation.y -= 0.006;
 
     orbitControls.update();
 
@@ -364,7 +628,41 @@ function animate() {
         cube3.position.y = cube3.userData.startY + Math.sin(Date.now() * cube3.userData.floatSpeed) * 0.3;
     }
 
+    if (isTraveling) {
+        journeyProgress += 0.002;
+
+       const point = journeyCurve.getPointAt(journeyProgress);
+
+    // Look slightly ahead on the journey
+    const lookAheadProgress = Math.min(
+        journeyProgress + 0.08,
+        1
+    );
+
+    const lookAheadPoint = journeyCurve.getPointAt(
+        lookAheadProgress
+    );
+
+    // Move camera along the journey
+    camera.position.x = point.x;
+    camera.position.y = point.y;
+    camera.position.z = point.z + 5;
+
+    // Look toward where we're going
+    orbitControls.target.copy(lookAheadPoint);
+
+        if (journeyProgress >= 1) {
+            journeyProgress = 1;
+            isTraveling = false;
+        }
+    }
+
+
     renderer.render(scene, camera);
 }
 
 animate();
+
+setTimeout(() => {
+    travelToEducation();
+}, 2000);
