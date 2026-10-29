@@ -137,6 +137,32 @@ glowContext.fillRect(0, 0, 128, 128);
 
 const glowTexture = new THREE.CanvasTexture(glowCanvas);
 
+
+const nebulaCanvas = document.createElement('canvas');
+nebulaCanvas.width = 256;
+nebulaCanvas.height = 256;
+
+const nebulaContext = nebulaCanvas.getContext('2d');
+
+const nebulaGradient = nebulaContext.createRadialGradient(
+    128, 128, 0,
+    128, 128, 128
+);
+
+nebulaGradient.addColorStop(0, 'rgba(102, 100, 255, 0.28)');
+nebulaGradient.addColorStop(0.35, 'rgba(130, 80, 220, 0.18)');
+nebulaGradient.addColorStop(0.7, 'rgba(70, 100, 200, 0.06)');
+nebulaGradient.addColorStop(1, 'rgba(70, 100, 200, 0)');
+
+nebulaContext.fillStyle = nebulaGradient;
+nebulaContext.fillRect(0, 0, 256, 256);
+
+const nebulaTexture = new THREE.CanvasTexture(nebulaCanvas);
+
+
+
+
+
 const glowMaterial = new THREE.SpriteMaterial({
     map: glowTexture,
     transparent: true,
@@ -170,6 +196,41 @@ const educationPlanet = new THREE.Mesh(
 educationPlanet.position.copy(education.position);
 
 scene.add(educationPlanet);
+
+const nebulaMaterial = new THREE.SpriteMaterial({
+    map: nebulaTexture,
+    transparent: true,
+    opacity: 0.8,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending
+});
+
+const educationNebula = new THREE.Sprite(nebulaMaterial);
+educationNebula.position.set(
+    education.position.x,
+    education.position.y + 0.7,
+    education.position.z - 0.8
+);
+educationNebula.scale.set(4.5, 4.5, 1);
+
+scene.add(educationNebula);
+
+// Soft glow around the Education planet
+const educationGlowMaterial = new THREE.SpriteMaterial({
+    map: glowTexture,
+    color: education.color,
+    transparent: true,
+    opacity: 0.55,
+    depthWrite: false
+});
+
+const educationGlow = new THREE.Sprite(educationGlowMaterial);
+
+educationGlow.position.copy(education.position);
+educationGlow.scale.set(1.5, 1.5, 1);
+
+scene.add(educationGlow);
+
 
 
 // Education orbit ring
@@ -214,6 +275,48 @@ educationRing2.rotation.z = Math.PI / 3;
 scene.add(educationRing, educationRing2);
 
 
+
+// Small celestial bodies around the Education planet
+const educationStars = [];
+
+const educationStarData = [
+    { x: -1.1, y: 1.7, z: 0.1, size: 0.09, color: 0x66ccff },
+    { x: 1.2, y: 1.5, z: 0.2, size: 0.12, color: 0xffcc66 },
+    { x: 0.9, y: 0.1, z: -0.2, size: 0.08, color: 0xcc99ff }
+];
+
+
+educationStarData.forEach((starData) => {
+    const starGeometry = new THREE.SphereGeometry(
+        starData.size,
+        16,
+        16
+    );
+
+    const starMaterial = new THREE.MeshBasicMaterial({
+        color: starData.color
+    });
+
+    const star = new THREE.Mesh(starGeometry, starMaterial);
+
+    star.position.set(
+        education.position.x + starData.x,
+        education.position.y + starData.y,
+        education.position.z + starData.z
+    );
+
+    scene.add(star);
+    educationStars.push(star);
+});
+
+
+
+educationStars.forEach((star, index) => {
+    star.userData.basePosition = star.position.clone();
+    star.userData.floatOffset = index * 2;
+    star.userData.floatSpeed = 0.8 + index * 0.2;
+});
+
 // Education ring rotation
 educationRing.rotation.z += 0.005;
 
@@ -246,7 +349,7 @@ const journeyTrail = new THREE.Mesh(
     journeyMaterial
 );
 
-scene.add(journeyTrail);
+// scene.add(journeyTrail);
 
 function travelToEducation() {
     if (isTraveling) return;
@@ -256,9 +359,9 @@ function travelToEducation() {
 }
 
 const camera = new THREE.PerspectiveCamera(
-    75, 
-    window.innerWidth / window.innerHeight, 
-    0.1, 
+    75,
+    window.innerWidth / window.innerHeight,
+    0.1,
     1000
 );
 
@@ -427,7 +530,7 @@ window.addEventListener('mousemove', (event) => {
 
 //cube1
 const geometry1 = new THREE.BoxGeometry();
-const material1 = new THREE.MeshBasicMaterial({color: 0xff00aa}); // Pink
+const material1 = new THREE.MeshBasicMaterial({ color: 0xff00aa }); // Pink
 const cube1 = new THREE.Mesh(geometry1, material1);
 cube1.position.x = 3;
 cube1.position.y = 2;
@@ -436,14 +539,14 @@ cube1.name = 'The Pink Cube';
 
 //cube2
 const geometry2 = new THREE.BoxGeometry();
-const material2 = new THREE.MeshBasicMaterial({color: 0x8000ff}); // Purple
+const material2 = new THREE.MeshBasicMaterial({ color: 0x8000ff }); // Purple
 const cube2 = new THREE.Mesh(geometry2, material2);
 cube2.position.set(1, -1, 1);
 cube2.name = 'The Purple Cube';
 
 //cube3
 const geometry3 = new THREE.BoxGeometry();
-const material3 = new THREE.MeshBasicMaterial({color: 0xf9f99});
+const material3 = new THREE.MeshBasicMaterial({ color: 0xf9f99 });
 const cube3 = new THREE.Mesh(geometry3, material3);
 cube3.position.set(-3, 0, -2);
 cube3.name = "The Veraman Cube"
@@ -482,10 +585,9 @@ cube1.userData.floatSpeed = 0.001;
 cube2.userData.floatSpeed = 0.0015;
 cube3.userData.floatSpeed = 0.002;
 
-scene.add(cube1, cube2, cube3, smallStars, mediumStars, bigStars);
+// 
 
-
-const controls = new DragControls (
+const controls = new DragControls(
     [cube1, cube2, cube3],
     camera,
     renderer.domElement
@@ -516,7 +618,133 @@ controls.addEventListener('dragend', (event) => {
     console.log('Stopped dragging: ', event.object.name);
 });
 
-camera.position.set(0, -2, 5);
+camera.position.set(0, -0.5, 5);
+
+orbitControls.target.set(0, -0.5, 0);
+orbitControls.update();
+
+
+let cameraMoveTarget = null;
+let lookAtTarget = null;
+
+
+// Click on the Education planet
+renderer.domElement.addEventListener('click', (event) => {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+
+    const intersects = raycaster.intersectObject(educationPlanet);
+
+    if (intersects.length > 0) {
+        cameraMoveTarget = new THREE.Vector3(
+            education.position.x,
+            education.position.y,
+            3
+        );
+
+        lookAtTarget = education.position.clone();
+    }
+});
+
+
+const educationInfo = document.getElementById('education-info');
+const educationTitle = document.getElementById('education-title');
+const educationDescription = document.getElementById('education-description');
+const closeEducationInfo = document.getElementById('close-education-info');
+
+const educationDetails = [
+    {
+        title: 'COMPUTER GRAPHICS',
+        description: 'Master’s degree in Computing, Image Synthesis and Computer Graphics.'
+    },
+    {
+        title: 'WEB DEVELOPMENT',
+        description: 'Studies in Informatics Applications, with a foundation in web technologies and development.'
+    },
+    {
+        title: 'NATURE & ENVIRONMENT',
+        description: 'Studies in Forestry and Natural Environment Management, connecting technology with the natural world.'
+    }
+];
+
+// Click on the small Education stars
+renderer.domElement.addEventListener('click', (event) => {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+
+    const starIntersects = raycaster.intersectObjects(educationStars);
+
+    if (starIntersects.length > 0) {
+        const selectedStar = educationStars.indexOf(
+            starIntersects[0].object
+        );
+
+        const details = educationDetails[selectedStar];
+
+        if (details) {
+            educationTitle.textContent = details.title;
+            educationDescription.textContent = details.description;
+            educationInfo.style.display = 'block';
+        }
+    }
+});
+
+closeEducationInfo.addEventListener('click', () => {
+    educationInfo.style.display = 'none';
+});
+
+
+// Click on the small Education stars
+renderer.domElement.addEventListener('click', (event) => {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+
+    const starIntersects = raycaster.intersectObjects(educationStars);
+
+    if (starIntersects.length > 0) {
+        const selectedStar = educationStars.indexOf(
+            starIntersects[0].object
+        );
+
+        console.log('Selected Education star:', selectedStar);
+    }
+});
+
+
+window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+        cameraMoveTarget = new THREE.Vector3(0, -0.5, 5);
+        lookAtTarget = new THREE.Vector3(0, -0.5, 0);
+    }
+});
+
+
+const educationLabel = document.createElement('div');
+
+educationLabel.textContent = 'EDUCATION';
+
+educationLabel.style.position = 'fixed';
+educationLabel.style.display = 'none';
+educationLabel.style.color = '#ffcc66';
+educationLabel.style.fontFamily = 'Arial, sans-serif';
+educationLabel.style.fontSize = '14px';
+educationLabel.style.fontWeight = 'bold';
+educationLabel.style.letterSpacing = '3px';
+educationLabel.style.pointerEvents = 'none';
+educationLabel.style.transform = 'translate(-50%, -100%)';
+educationLabel.style.textShadow = '0 0 12px #ffcc66';
+educationLabel.style.zIndex = '10';
+
+document.body.appendChild(educationLabel);
+
+
+
 
 function animate() {
     requestAnimationFrame(animate);
@@ -533,10 +761,93 @@ function animate() {
     );
 
     // Education ring rotation
+
     educationRing.rotation.y += 0.005;
     educationRing2.rotation.y -= 0.006;
 
+
+    // Gentle floating motion around Education
+    const educationTime = Date.now() * 0.001;
+
+    educationStars.forEach((star) => {
+        star.position.y =
+            star.userData.basePosition.y +
+            Math.sin(
+                educationTime * star.userData.floatSpeed +
+                star.userData.floatOffset
+            ) * 0.08;
+    });
+
+    // Education planet hover effect
+    raycaster.setFromCamera(mouse, camera);
+
+    const educationIntersects = raycaster.intersectObject(educationPlanet);
+
+    const educationTargetScale = educationIntersects.length > 0 ? 1.2 : 1;
+
+    // Hover effect for Education stars
+    const starIntersects = raycaster.intersectObjects(educationStars);
+
+    educationStars.forEach((star) => {
+        const isHovered = starIntersects.some(
+            (intersect) => intersect.object === star
+        );
+
+        const targetScale = isHovered ? 1.5 : 1;
+
+        star.scale.lerp(
+            new THREE.Vector3(targetScale, targetScale, targetScale),
+            0.1
+        );
+    });
+
+    if (educationIntersects.length > 0) {
+        const screenPosition = educationPlanet.position.clone();
+        screenPosition.project(camera);
+
+        const canvasRect = renderer.domElement.getBoundingClientRect();
+
+        educationLabel.style.left =
+            `${canvasRect.left + (screenPosition.x + 1) * canvasRect.width / 2}px`;
+
+        educationLabel.style.top =
+            `${canvasRect.top + (1 - screenPosition.y) * canvasRect.height / 2 - 25}px`;
+
+        educationLabel.style.display = 'block';
+    } else {
+        educationLabel.style.display = 'none';
+    }
+
+
+    educationPlanet.scale.lerp(
+        new THREE.Vector3(
+            educationTargetScale,
+            educationTargetScale,
+            educationTargetScale
+        ),
+        0.1
+    );
+
+    educationGlow.material.opacity =
+        educationIntersects.length > 0 ? 0.85 : 0.55;
+
+
+    // Smooth camera movement toward Education
+    if (cameraMoveTarget && lookAtTarget) {
+        camera.position.lerp(cameraMoveTarget, 0.04);
+        orbitControls.target.lerp(lookAtTarget, 0.04);
+
+        if (camera.position.distanceTo(cameraMoveTarget) < 0.01) {
+            camera.position.copy(cameraMoveTarget);
+            orbitControls.target.copy(lookAtTarget);
+
+            cameraMoveTarget = null;
+            lookAtTarget = null;
+        }
+    }
+
     orbitControls.update();
+
 
     // Twinkle effect
     const time = Date.now() * 0.002;
@@ -578,7 +889,7 @@ function animate() {
     if (intersects.length > 0) {
         const object = intersects[0].object;
         console.log('Hovering:', object.name);
-        
+
         if (hoveredObject !== object) {
             if (hoveredObject) {
                 hoveredObject.userData.targetScale = 1;
@@ -600,7 +911,7 @@ function animate() {
                 hoveredObject.userData.originalColor;
 
             hoveredObject = null;
-        } 
+        }
     }
 
     cubes.forEach((cube) => {
@@ -631,25 +942,25 @@ function animate() {
     if (isTraveling) {
         journeyProgress += 0.002;
 
-       const point = journeyCurve.getPointAt(journeyProgress);
+        const point = journeyCurve.getPointAt(journeyProgress);
 
-    // Look slightly ahead on the journey
-    const lookAheadProgress = Math.min(
-        journeyProgress + 0.08,
-        1
-    );
+        // Look slightly ahead on the journey
+        const lookAheadProgress = Math.min(
+            journeyProgress + 0.08,
+            1
+        );
 
-    const lookAheadPoint = journeyCurve.getPointAt(
-        lookAheadProgress
-    );
+        const lookAheadPoint = journeyCurve.getPointAt(
+            lookAheadProgress
+        );
 
-    // Move camera along the journey
-    camera.position.x = point.x;
-    camera.position.y = point.y;
-    camera.position.z = point.z + 5;
+        // Move camera along the journey
+        camera.position.x = point.x;
+        camera.position.y = point.y;
+        camera.position.z = point.z + 5;
 
-    // Look toward where we're going
-    orbitControls.target.copy(lookAheadPoint);
+        // Look toward where we're going
+        orbitControls.target.copy(lookAheadPoint);
 
         if (journeyProgress >= 1) {
             journeyProgress = 1;
@@ -663,6 +974,3 @@ function animate() {
 
 animate();
 
-setTimeout(() => {
-    travelToEducation();
-}, 2000);

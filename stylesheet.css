@@ -1,0 +1,49 @@
+
+#education-info {
+    display: none;
+    position: fixed;
+    top: 50%;
+    right: 40px;
+    transform: translateY(-50%);
+    width: 280px;
+    padding: 24px;
+    color: #eaf4ff;
+    background: rgba(8, 11, 36, 0.88);
+    border: 1px solid rgba(102, 204, 255, 0.45);
+    border-radius: 16px;
+    box-shadow: 0 0 30px rgba(102, 204, 255, 0.12);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+    font-family: Arial, sans-serif;
+}
+
+#education-info h2 {
+    margin-top: 0;
+    color: #66ccff;
+    font-size: 20px;
+    letter-spacing: 3px;
+}
+
+#education-info p {
+    color: #c8d6ed;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+#close-education-info {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    color: #eaf4ff;
+    font-size: 25px;
+    cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    #education-info {
+        right: 5%;
+        width: 75%;
+    }
+}
