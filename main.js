@@ -9,12 +9,33 @@ let journeyProgress = 0;
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x080b24);
 
+// SYSTEM GROUPS
+
+const educationGroup = new THREE.Group();
+educationGroup.name = 'Education System';
+
+const customerServiceGroup = new THREE.Group();
+customerServiceGroup.name = 'Customer & Service System';
+
+const technologyGroup = new THREE.Group();
+technologyGroup.name = 'Technology System';
+
+const beyondCVGroup = new THREE.Group();
+beyondCVGroup.name = 'Beyond the CV System';
+
+// Add all system groups to the main scene
+scene.add(
+    educationGroup,
+    customerServiceGroup,
+    technologyGroup,
+    beyondCVGroup
+);
 
 const destinations = [
     {
         id: "the-why",
         title: "THE WHY",
-        position: new THREE.Vector3(0, -2, 0),
+        position: new THREE.Vector3(0, 0, 0),
         color: 0xffcc66,
         experiences: []
     },
@@ -22,75 +43,36 @@ const destinations = [
     {
         id: "education",
         title: "EDUCATION",
-        position: new THREE.Vector3(0.4, 1, 0),
+        position: new THREE.Vector3(-5, 5, 4),
         color: 0xffcc66,
         experiences: []
     },
 
     {
-        id: "retail",
-        title: "CUSTOMER / RETAIL",
-        position: new THREE.Vector3(0, 3, 0),
+        id: "customer-service",
+        title: "CUSTOMER & SERVICE",
+        position: new THREE.Vector3(2, 3.5, 4),
         color: 0xff9966,
         experiences: []
     },
 
     {
-        id: "video-club",
-        title: "VIDEO CLUB",
-        position: new THREE.Vector3(-0.5, 5, 0),
-        color: 0xff6699,
-        experiences: []
-    },
-
-    {
-        id: "web-development",
-        title: "WEB DEVELOPMENT",
-        position: new THREE.Vector3(0.5, 7, 0),
-        color: 0x66ccff,
-        experiences: []
-    },
-
-    {
-        id: "service-delivery",
-        title: "SERVICE DELIVERY",
-        position: new THREE.Vector3(-0.3, 9, 0),
-        color: 0x66ffcc,
-        experiences: []
-    },
-
-    {
-        id: "iam",
-        title: "IAM",
-        position: new THREE.Vector3(0.4, 11, 0),
+        id: "technology",
+        title: "TECHNOLOGY",
+        position: new THREE.Vector3(-4.5, -4, 2),
         color: 0x9966ff,
         experiences: []
     },
 
     {
-        id: "qa",
-        title: "QA",
-        position: new THREE.Vector3(-0.4, 13, 0),
-        color: 0xff6699,
-        experiences: []
-    },
-
-    {
-        id: "what-didnt-work",
-        title: "WHAT DIDN'T WORK",
-        position: new THREE.Vector3(0.2, 15, 0),
-        color: 0x888888,
-        experiences: []
-    },
-
-    {
-        id: "future",
-        title: "FUTURE",
-        position: new THREE.Vector3(0, 17, 0),
-        color: 0xffffff,
+        id: "beyond-cv",
+        title: "BEYOND THE CV",
+        position: new THREE.Vector3(8.5, -2, 3),
+        color: 0x66ffcc,
         experiences: []
     }
 ];
+
 
 
 // THE WHY - our Sun
@@ -98,7 +80,7 @@ const why = destinations.find(
     destination => destination.id === "the-why"
 );
 
-const whyGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+const whyGeometry = new THREE.SphereGeometry(1.4, 32, 32);
 
 const whyMaterial = new THREE.MeshBasicMaterial({
     color: why.color
@@ -176,13 +158,77 @@ whyGlow.scale.set(1.8, 1.8, 1);
 
 scene.add(whyGlow);
 
+// MAIN UNIVERSE - Additional gateway planets
+
+const gatewaySystems = [
+    {
+        id: "customer-service",
+        title: "CUSTOMER & SERVICE",
+        color: 0xff9966,
+        size: 0.85,
+        glowSize: 2.5
+    },
+    {
+        id: "technology",
+        title: "TECHNOLOGY",
+        color: 0x9966ff,
+        size: 0.85,
+        glowSize: 2.5
+    },
+    {
+        id: "beyond-cv",
+        title: "BEYOND THE CV",
+        color: 0x66ffcc,
+        size: 0.85,
+        glowSize: 2.5
+    }
+];
+
+const gatewayPlanets = [];
+
+gatewaySystems.forEach((system) => {
+
+    const destination = destinations.find(
+        item => item.id === system.id
+    );
+
+    const planet = new THREE.Mesh(
+        new THREE.SphereGeometry(system.size, 32, 32),
+        new THREE.MeshBasicMaterial({
+            color: system.color
+        })
+    );
+
+    planet.position.copy(destination.position);
+
+    planet.userData.systemId = system.id;
+    planet.userData.title = system.title;
+
+    const glow = new THREE.Sprite(
+        new THREE.SpriteMaterial({
+            map: glowTexture,
+            color: system.color,
+            transparent: true,
+            opacity: 0.65,
+            depthWrite: false
+        })
+    );
+
+    glow.position.copy(destination.position);
+    glow.scale.set(system.glowSize, system.glowSize, 1);
+
+    scene.add(planet);
+    scene.add(glow);
+
+    gatewayPlanets.push(planet);
+});
 
 // EDUCATION destination
 const education = destinations.find(
     destination => destination.id === "education"
 );
 
-const educationGeometry = new THREE.SphereGeometry(0.35, 32, 32);
+const educationGeometry = new THREE.SphereGeometry(0.55, 32, 32);
 
 const educationMaterial = new THREE.MeshBasicMaterial({
     color: education.color
@@ -195,7 +241,7 @@ const educationPlanet = new THREE.Mesh(
 
 educationPlanet.position.copy(education.position);
 
-scene.add(educationPlanet);
+educationGroup.add(educationPlanet);
 
 const nebulaMaterial = new THREE.SpriteMaterial({
     map: nebulaTexture,
@@ -213,7 +259,7 @@ educationNebula.position.set(
 );
 educationNebula.scale.set(4.5, 4.5, 1);
 
-scene.add(educationNebula);
+educationGroup.add(educationNebula);
 
 // Soft glow around the Education planet
 const educationGlowMaterial = new THREE.SpriteMaterial({
@@ -229,7 +275,7 @@ const educationGlow = new THREE.Sprite(educationGlowMaterial);
 educationGlow.position.copy(education.position);
 educationGlow.scale.set(1.5, 1.5, 1);
 
-scene.add(educationGlow);
+educationGroup.add(educationGlow);
 
 
 
@@ -237,9 +283,10 @@ scene.add(educationGlow);
 const educationRingGeometry = new THREE.RingGeometry(0.45, 0.50, 64);
 
 const educationRingMaterial = new THREE.MeshBasicMaterial({
-    color: education.color,
+    // color: education.color,
+    color: 0x66ddff,
     transparent: true,
-    opacity: 0.35,
+    opacity: 0.55,
     side: THREE.DoubleSide
 });
 
@@ -250,15 +297,15 @@ const educationRing = new THREE.Mesh(
 
 educationRing.position.copy(education.position);
 
-educationRing.rotation.x = Math.PI / 2;
+educationRing.rotation.x = Math.PI / 3;
 
 // Second Education orbit ring
 const educationRing2Geometry = new THREE.RingGeometry(0.55, 0.59, 64);
 
 const educationRing2Material = new THREE.MeshBasicMaterial({
-    color: education.color,
+    color: 0x66ddff,
     transparent: true,
-    opacity: 0.2,
+    opacity: 0.35,
     side: THREE.DoubleSide
 });
 
@@ -269,10 +316,10 @@ const educationRing2 = new THREE.Mesh(
 
 educationRing2.position.copy(education.position);
 
-educationRing2.rotation.x = Math.PI / 2;
+educationRing2.rotation.x = Math.PI / 3;
 educationRing2.rotation.z = Math.PI / 3;
 
-scene.add(educationRing, educationRing2);
+educationGroup.add(educationRing, educationRing2);
 
 
 
@@ -298,6 +345,7 @@ educationStarData.forEach((starData) => {
     });
 
     const star = new THREE.Mesh(starGeometry, starMaterial);
+    star.userData.systemId = "education";
 
     star.position.set(
         education.position.x + starData.x,
@@ -305,7 +353,7 @@ educationStarData.forEach((starData) => {
         education.position.z + starData.z
     );
 
-    scene.add(star);
+    educationGroup.add(star);
     educationStars.push(star);
 });
 
@@ -316,6 +364,230 @@ educationStars.forEach((star, index) => {
     star.userData.floatOffset = index * 2;
     star.userData.floatSpeed = 0.8 + index * 0.2;
 });
+
+// CUSTOMER & SERVICE - Small planets
+
+const customerService = destinations.find(
+    destination => destination.id === "customer-service"
+);
+
+const customerServicePlanetsData = [
+    {
+        title: "CUSTOMER / RETAIL",
+        offset: new THREE.Vector3(-1.3, 1.2, 0),
+        color: 0xffcc66
+    },
+    {
+        title: "VIDEO CLUB",
+        offset: new THREE.Vector3(1.4, 1.5, -0.3),
+        color: 0xff6699
+    },
+    {
+        title: "SERVICE DELIVERY",
+        offset: new THREE.Vector3(1.1, -1.2, 0.2),
+        color: 0xff9966
+    }
+];
+
+const customerServicePlanets = [];
+
+customerServicePlanetsData.forEach((planetData) => {
+
+    const planet = new THREE.Mesh(
+        new THREE.SphereGeometry(0.16, 24, 24),
+        new THREE.MeshBasicMaterial({
+            color: planetData.color
+        })
+    );
+
+    planet.position.copy(
+        customerService.position
+    ).add(planetData.offset);
+
+    planet.userData.title = planetData.title;
+    planet.userData.systemId = "customer-service";
+
+    customerServiceGroup.add(planet);
+
+    customerServicePlanets.push(planet);
+});
+
+
+// CUSTOMER & SERVICE - Planet glows
+
+customerServicePlanets.forEach((planet) => {
+
+    const glow = new THREE.Sprite(
+        new THREE.SpriteMaterial({
+            map: glowTexture,
+            color: planet.material.color,
+            transparent: true,
+            opacity: 0.55,
+            depthWrite: false
+        })
+    );
+
+    glow.position.copy(planet.position);
+    glow.scale.set(0.65, 0.65, 1);
+
+    customerServiceGroup.add(glow);
+});
+
+// TECHNOLOGY - Small planets
+
+const technology = destinations.find(
+    destination => destination.id === "technology"
+);
+
+const technologyPlanetsData = [
+    {
+        title: "WEB DEVELOPMENT",
+        offset: new THREE.Vector3(-1.4, 1.2, 0),
+        color: 0x66ccff
+    },
+    {
+        title: "IAM",
+        offset: new THREE.Vector3(1.3, 1.5, -0.3),
+        color: 0xcc99ff
+    },
+    {
+        title: "QA",
+        offset: new THREE.Vector3(0.8, -1.3, 0.2),
+        color: 0x66ffcc
+    }
+];
+
+const technologyPlanets = [];
+
+technologyPlanetsData.forEach((planetData) => {
+
+    const planet = new THREE.Mesh(
+        new THREE.SphereGeometry(0.16, 24, 24),
+        new THREE.MeshBasicMaterial({
+            color: planetData.color
+        })
+    );
+
+    planet.position.copy(
+        technology.position
+    ).add(planetData.offset);
+
+    planet.userData.title = planetData.title;
+    planet.userData.systemId = "technology";
+
+    technologyGroup.add(planet);
+    technologyPlanets.push(planet);
+});
+
+// TECHNOLOGY - Planet glows
+
+technologyPlanets.forEach((planet) => {
+
+    const glow = new THREE.Sprite(
+        new THREE.SpriteMaterial({
+            map: glowTexture,
+            color: planet.material.color,
+            transparent: true,
+            opacity: 0.55,
+            depthWrite: false
+        })
+    );
+
+    glow.position.copy(planet.position);
+    glow.scale.set(0.65, 0.65, 1);
+
+    technologyGroup.add(glow);
+});
+
+// BEYOND THE CV - Small planets
+
+const beyondCV = destinations.find(
+    destination => destination.id === "beyond-cv"
+);
+
+const beyondCVPlanetsData = [
+    {
+        title: "DREAMS & ASPIRATIONS",
+        offset: new THREE.Vector3(-1.8, 1.5, 0),
+        color: 0xffcc66
+    },
+    {
+        title: "HOBBIES & CREATIVITY",
+        offset: new THREE.Vector3(0, 2, -0.3),
+        color: 0xff66cc
+    },
+    {
+        title: "LIKES & DISLIKES",
+        offset: new THREE.Vector3(1.8, 1.2, 0.2),
+        color: 0x66ccff
+    },
+    {
+        title: "PERSONAL INTERESTS",
+        offset: new THREE.Vector3(-1.5, -1.2, -0.2),
+        color: 0x99ff99
+    },
+    {
+        title: "WHAT DIDN'T WORK",
+        offset: new THREE.Vector3(0.5, -1.8, 0.3),
+        color: 0xff9966
+    },
+    {
+        title: "FUTURE",
+        offset: new THREE.Vector3(2, -1, -0.3),
+        color: 0xcc99ff
+    }
+];
+
+const beyondCVPlanets = [];
+
+beyondCVPlanetsData.forEach((planetData) => {
+
+    const planet = new THREE.Mesh(
+        new THREE.SphereGeometry(0.14, 24, 24),
+        new THREE.MeshBasicMaterial({
+            color: planetData.color
+        })
+    );
+
+    planet.position.copy(
+        beyondCV.position
+    ).add(planetData.offset);
+
+    planet.userData.title = planetData.title;
+    planet.userData.systemId = "beyond-cv";
+
+    beyondCVGroup.add(planet);
+    beyondCVPlanets.push(planet);
+});
+
+// BEYOND THE CV - Planet glows
+
+beyondCVPlanets.forEach((planet) => {
+
+    const glow = new THREE.Sprite(
+        new THREE.SpriteMaterial({
+            map: glowTexture,
+            color: planet.material.color,
+            transparent: true,
+            opacity: 0.6,
+            depthWrite: false
+        })
+    );
+
+    glow.position.copy(planet.position);
+    glow.scale.set(0.7, 0.7, 1);
+
+    beyondCVGroup.add(glow);
+});
+
+// All small planets that support hover labels
+const allHoverablePlanets = [
+    ...educationStars,
+    ...customerServicePlanets,
+    ...technologyPlanets,
+    ...beyondCVPlanets
+];
+
 
 // Education ring rotation
 educationRing.rotation.z += 0.005;
@@ -503,6 +775,7 @@ const bigStars = new THREE.Points(
     bigStarsMaterial
 );
 
+scene.add(smallStars, mediumStars, bigStars);
 
 // Twinkling settings
 const smallStarsBaseOpacity = 0.7;
@@ -513,6 +786,8 @@ const starMovementSpeed = 0.00002;
 
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
+const hoverRaycaster = new THREE.Raycaster();
+const hoverMouse = new THREE.Vector2();
 
 let hoveredObject = null;
 
@@ -520,6 +795,11 @@ window.addEventListener('mousemove', (event) => {
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 })
+
+window.addEventListener('mousemove', (event) => {
+    hoverMouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    hoverMouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+});
 
 // cube.position.set(2, 0, 0);   // right
 // cube.position.set(-2, 0, 0);  // left
@@ -603,7 +883,7 @@ orbitControls.enableDamping = true;
 orbitControls.dampingFactor = 0.05;
 
 orbitControls.minDistance = 3;
-orbitControls.maxDistance = 15;
+orbitControls.maxDistance = 40;
 
 controls.addEventListener('dragstart', (event) => {
     draggedObject = event.object;
@@ -618,41 +898,75 @@ controls.addEventListener('dragend', (event) => {
     console.log('Stopped dragging: ', event.object.name);
 });
 
-camera.position.set(0, -0.5, 5);
+camera.position.set(0, -1, 20);
 
-orbitControls.target.set(0, -0.5, 0);
+orbitControls.target.set(0, -1, 0);
 orbitControls.update();
 
 
 let cameraMoveTarget = null;
 let lookAtTarget = null;
 
+let activeSystemId = null;
+let isSystemEntered = false;
 
-// Click on the Education planet
+// Click on any gateway planet
 renderer.domElement.addEventListener('click', (event) => {
+
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
     raycaster.setFromCamera(mouse, camera);
 
-    const intersects = raycaster.intersectObject(educationPlanet);
+    const allGatewayPlanets = [
+        educationPlanet,
+        ...gatewayPlanets
+    ];
+
+    const intersects = raycaster.intersectObjects(allGatewayPlanets);
 
     if (intersects.length > 0) {
-        cameraMoveTarget = new THREE.Vector3(
-            education.position.x,
-            education.position.y,
-            3
+
+        const selectedPlanet = intersects[0].object;
+
+        const selectedSystemId =
+            selectedPlanet === educationPlanet
+                ? "education"
+                : selectedPlanet.userData.systemId;
+
+        const destination = destinations.find(
+            item => item.id === selectedSystemId
         );
 
-        lookAtTarget = education.position.clone();
+        if (destination) {
+
+            activeSystemId = selectedSystemId;
+            isSystemEntered = false;
+
+            // Close any previously open information card
+            educationInfo.style.display = 'none';
+            selectedInfoPlanet = null;
+
+            cameraMoveTarget = new THREE.Vector3(
+                destination.position.x,
+                destination.position.y,
+                destination.position.z + 7
+            );
+
+            lookAtTarget = destination.position.clone();
+
+            console.log("Entering system:", destination.title);
+        }
     }
 });
 
 
 const educationInfo = document.getElementById('education-info');
+const planetTooltip = document.getElementById('planet-tooltip');
 const educationTitle = document.getElementById('education-title');
 const educationDescription = document.getElementById('education-description');
 const closeEducationInfo = document.getElementById('close-education-info');
+let selectedInfoPlanet = null;
 
 const educationDetails = [
     {
@@ -669,32 +983,66 @@ const educationDetails = [
     }
 ];
 
-// Click on the small Education stars
+
+// Click on all small planets
 renderer.domElement.addEventListener('click', (event) => {
+
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
     raycaster.setFromCamera(mouse, camera);
 
-    const starIntersects = raycaster.intersectObjects(educationStars);
+    const allSmallPlanets = [
+        ...educationStars,
+        ...customerServicePlanets,
+        ...technologyPlanets,
+        ...beyondCVPlanets
+    ];
 
-    if (starIntersects.length > 0) {
-        const selectedStar = educationStars.indexOf(
-            starIntersects[0].object
-        );
+    const intersects = raycaster.intersectObjects(allSmallPlanets);
 
-        const details = educationDetails[selectedStar];
+    if (intersects.length > 0) {
+
+        const selectedPlanet = intersects[0].object;
+
+        // Small planets are clickable only inside their own system
+        if (!isSystemEntered ||
+            selectedPlanet.userData.systemId !== activeSystemId) {
+            return;
+        }
+
+        let details;
+
+        // Education planets use the existing educationDetails array
+        if (educationStars.includes(selectedPlanet)) {
+
+            const selectedIndex = educationStars.indexOf(selectedPlanet);
+
+            details = educationDetails[selectedIndex];
+
+        } else {
+
+            details = {
+                title: selectedPlanet.userData.title,
+                description: 'More information about this chapter will be added soon.'
+            };
+        }
 
         if (details) {
+            selectedInfoPlanet = selectedPlanet;
             educationTitle.textContent = details.title;
             educationDescription.textContent = details.description;
             educationInfo.style.display = 'block';
+
+            console.log('Selected planet:', details.title);
         }
     }
 });
 
+
 closeEducationInfo.addEventListener('click', () => {
     educationInfo.style.display = 'none';
+    selectedInfoPlanet = null;
 });
 
 
@@ -707,7 +1055,11 @@ renderer.domElement.addEventListener('click', (event) => {
 
     const starIntersects = raycaster.intersectObjects(educationStars);
 
-    if (starIntersects.length > 0) {
+    if (
+        isSystemEntered &&
+        activeSystemId === "education" &&
+        starIntersects.length > 0
+    ) {
         const selectedStar = educationStars.indexOf(
             starIntersects[0].object
         );
@@ -719,8 +1071,16 @@ renderer.domElement.addEventListener('click', (event) => {
 
 window.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
-        cameraMoveTarget = new THREE.Vector3(0, -0.5, 5);
-        lookAtTarget = new THREE.Vector3(0, -0.5, 0);
+        cameraMoveTarget = new THREE.Vector3(0, -1, 20);
+        lookAtTarget = new THREE.Vector3(0, -1, 0);
+
+        activeSystemId = null;
+        isSystemEntered = false;
+
+        // Close information card
+        educationInfo.style.display = 'none';
+        educationInfo.style.visibility = 'visible';
+        selectedInfoPlanet = null;
     }
 });
 
@@ -841,6 +1201,8 @@ function animate() {
             camera.position.copy(cameraMoveTarget);
             orbitControls.target.copy(lookAtTarget);
 
+            isSystemEntered = true;
+
             cameraMoveTarget = null;
             lookAtTarget = null;
         }
@@ -848,6 +1210,96 @@ function animate() {
 
     orbitControls.update();
 
+    // HOVER LABELS FOR SMALL PLANETS
+
+    if (cameraMoveTarget || isSystemEntered) {
+
+        planetTooltip.style.opacity = '0';
+
+    } else {
+
+        hoverRaycaster.setFromCamera(hoverMouse, camera);
+
+        const hoverIntersects = hoverRaycaster.intersectObjects(
+            allHoverablePlanets
+        );
+
+        if (hoverIntersects.length > 0) {
+
+            const planet = hoverIntersects[0].object;
+
+            if (planet.userData.title) {
+
+                planetTooltip.textContent = planet.userData.title;
+
+                const screenPosition = planet.getWorldPosition(
+                    new THREE.Vector3()
+                );
+
+                screenPosition.project(camera);
+
+                const canvasRect = renderer.domElement.getBoundingClientRect();
+
+                const x = canvasRect.left +
+                    (screenPosition.x * 0.5 + 0.5) * canvasRect.width;
+
+                const y = canvasRect.top +
+                    (-screenPosition.y * 0.5 + 0.5) * canvasRect.height;
+
+                planetTooltip.style.left = `${x + 15}px`;
+                planetTooltip.style.top = `${y - 15}px`;
+
+                planetTooltip.style.opacity = '1';
+            }
+
+        } else {
+
+            planetTooltip.style.opacity = '0';
+        }
+    }
+
+    // FOLLOW SELECTED PLANET WITH INFO CARD
+    if (selectedInfoPlanet && educationInfo.style.display !== 'none') {
+
+        const screenPosition = selectedInfoPlanet.getWorldPosition(new THREE.Vector3());
+        screenPosition.project(camera);
+
+        const isInFrontOfCamera = screenPosition.z > -1 && screenPosition.z < 1;
+
+        const isInsideScreen =
+            screenPosition.x >= -1 &&
+            screenPosition.x <= 1 &&
+            screenPosition.y >= -1 &&
+            screenPosition.y <= 1;
+
+        if (isInFrontOfCamera && isInsideScreen) {
+
+            educationInfo.style.visibility = 'visible';
+
+            const x = (screenPosition.x * 0.5 + 0.5) * window.innerWidth;
+            const y = (-screenPosition.y * 0.5 + 0.5) * window.innerHeight;
+
+            const cardWidth = educationInfo.offsetWidth;
+            const cardHeight = educationInfo.offsetHeight;
+            const gap = 25;
+
+            let cardX = x + gap;
+            let cardY = y - cardHeight / 2;
+
+            if (cardX + cardWidth > window.innerWidth - 15) {
+                cardX = x - cardWidth - gap;
+            }
+
+            cardX = Math.max(15, Math.min(cardX, window.innerWidth - cardWidth - 15));
+            cardY = Math.max(15, Math.min(cardY, window.innerHeight - cardHeight - 15));
+
+            educationInfo.style.left = `${cardX}px`;
+            educationInfo.style.top = `${cardY}px`;
+
+        } else {
+            educationInfo.style.visibility = 'hidden';
+        }
+    }
 
     // Twinkle effect
     const time = Date.now() * 0.002;
